@@ -1,54 +1,109 @@
-Digital Signature Verifier - Setup Instructions
+# Secure Communication Portal
 
-Project Structure
-digital_signature_verifier/
-├── app.py                  # Flask backend application
-├── templates/              # Frontend templates directory
-│   └── index.html          # Main HTML/JS interface
-└── requirements.txt        # Python dependencies
+A Flask-based web application demonstrating cryptographic principles including digital signatures, encryption/decryption, and key exchange. This application provides an interactive interface for understanding how these security mechanisms work in practice.
 
-Installation Steps
+## Features
 
-1. Create a virtual environment (recommended):
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+- **Digital Signatures**: Sign messages using RSA-PSS signatures and verify their authenticity.
+- **Encryption/Decryption**: Encrypt messages using AES-256-CBC and decrypt them securely.
+- **Key Exchange**: Simulate secure key exchange between client and server using RSA encryption.
+- **Interactive UI**: User-friendly interface with visual feedback and activity logging.
+- **Educational Diagrams**: Explanations of cryptographic processes for learning purposes.
 
-2. Install the required packages:
-   pip install -r requirements.txt
+## Technical Details
 
-3. Run the application:
-   python app.py
+### Backend (Flask)
 
-4. Open your browser and navigate to:
-   http://localhost:5000
+The application utilizes Python's Flask framework with the following cryptographic implementations:
 
-Dependencies
-The application requires these Python packages:
+- **RSA**: For asymmetric encryption and digital signatures.
+- **AES-256-CBC**: For symmetric encryption with proper padding.
+- **PBKDF2**: For secure key derivation.
+- **SHA-256**: For message fingerprinting and integrity verification.
+
+### Frontend
+
+- Pure HTML/CSS/JavaScript implementation.
+- Responsive design with a tabbed interface.
+- Real-time activity logging.
+- Educational diagrams explaining cryptographic concepts.
+
+## Installation and Setup
+
+### Prerequisites
+
+- Python 3.7+
 - Flask
-- cryptography
+- `cryptography` package
 
-How to Use
+### Step 1: Clone the Repository
 
-1. Type a message in the text area
-2. Click "Sign Message" to generate a digital signature
-3. The signature will appear in the signature box
-4. Click "Verify Signature" to check if the message is authentic
-5. To test tampering detection, click "Tamper Message" then "Verify Signature"
+```bash
+git clone https://github.com/shashankms2005/Digital-Signature-Verifier-App
+cd Digital-Signature-Verifier-App
+```
+### Step 2: Create and Activate Virtual Environment (Recommended)
 
-How It Works
+```bash
+python -m venv venv
+# On Windows
+venv\Scripts\activate
+# On macOS/Linux
+source venv/bin/activate
+```
 
-Backend
-- Generates an RSA key pair (public and private keys)
-- Uses the private key to sign messages
-- Uses the public key to verify signatures
+### Step 3: Install Dependencies
 
-Frontend
-- Sends message to backend for signing
-- Displays the returned signature
-- Allows verification of message integrity
-- Features a "tamper" button to demonstrate signature validation
+```bash
+pip install flask cryptography
+```
 
-Security Notes
-- In a production environment, keys should be securely stored and not generated on each app start
-- The frontend should use HTTPS for secure communication with the backend
-- This is a demonstration app and not meant for production use without further security enhancements
+### Step 4: Run the Application
+
+```bash
+python app.py
+```
+
+The application will be available at http://127.0.0.1:5000/
+
+## How to Use
+
+### Digital Signatures
+
+- Navigate to the "Digital Signatures" tab.
+- Enter a message in the text area.
+- Click "Sign Message" to create a digital signature.
+- Click "Verify Signature" to validate the signature against the message.
+- Try modifying the message to see how verification fails when content changes.
+
+### Encryption/Decryption
+
+- Navigate to the "Encryption/Decryption" tab.
+- Enter a message in the text area.
+- Click "Encrypt Message" to encrypt the content.
+- The encrypted data will appear in the designated area.
+- Click "Decrypt Message" to recover the original message.
+
+### Key Exchange
+
+- Navigate to the "Key Exchange" tab.
+- Click "Generate Client Key" to create a client key pair.
+- Click "Exchange with Server" to perform a key exchange operation.
+- The server's public key will be displayed upon successful exchange.
+
+## Security Considerations
+
+This application is designed for educational purposes and demonstrates cryptographic principles in a simplified manner. For production applications, consider the following security enhancements:
+
+- Implement proper session management.
+- Use secure cookies with HTTPS.
+- Add protection against CSRF attacks.
+- Implement rate limiting to prevent brute force attacks.
+- Use proper key management solutions.
+- Consider adding perfect forward secrecy.
+
+## Code Structure
+
+- `app.py`: Main Flask application with cryptographic implementations.
+- `templates/index.html`: Frontend interface with interactive components.
+- `static/`: Contains CSS and client-side JavaScript (if separated from HTML).

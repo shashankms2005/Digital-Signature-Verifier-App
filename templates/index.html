@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Signature Verifier</title>
+    <title>Secure Communication Portal</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f8fa;
@@ -21,8 +21,31 @@
         }
         h1 {
             color: #2c3e50;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+            background-color: #f8f9fa;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+            border-bottom: none;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
         }
         .form-group {
             margin-bottom: 20px;
@@ -41,7 +64,7 @@
             resize: vertical;
             font-family: inherit;
         }
-        .signature-box {
+        .signature-box, .encrypted-box, .key-box {
             background-color: #f5f5f5;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -81,12 +104,33 @@
         .button-verify:hover {
             background-color: #27ae60;
         }
-        .button-tamper {
-            background-color: #e74c3c;
+        .button-encrypt {
+            background-color: #9b59b6;
             color: white;
         }
-        .button-tamper:hover {
-            background-color: #c0392b;
+        .button-encrypt:hover {
+            background-color: #8e44ad;
+        }
+        .button-decrypt {
+            background-color: #f39c12;
+            color: white;
+        }
+        .button-decrypt:hover {
+            background-color: #d35400;
+        }
+        .button-generate {
+            background-color: #3498db;
+            color: white;
+        }
+        .button-generate:hover {
+            background-color: #2980b9;
+        }
+        .button-exchange {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .button-exchange:hover {
+            background-color: #27ae60;
         }
         .result {
             margin-top: 30px;
@@ -119,47 +163,205 @@
             color: #2c3e50;
             margin-top: 0;
         }
+        .activity-log {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9em;
+            background-color: #f8f9fa;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-time {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .log-success {
+            color: #2ecc71;
+        }
+        .log-error {
+            color: #e74c3c;
+        }
+        .log-info {
+            color: #3498db;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Digital Signature Verifier</h1>
+        <h1>Secure Communication Portal</h1>
         
-        <div class="form-group">
-            <label for="message">Enter your message:</label>
-            <textarea id="message" placeholder="Type your message here..."></textarea>
+        <div class="tabs">
+            <div class="tab active" data-tab="signature">Digital Signatures</div>
+            <div class="tab" data-tab="encryption">Encryption/Decryption</div>
+            <div class="tab" data-tab="key-exchange">Key Exchange</div>
         </div>
         
-        <div class="form-group signature-container">
-            <label for="signature">Signature:</label>
-            <div id="signature" class="signature-box">No signature generated yet</div>
+        <!-- Signature Tab -->
+        <div class="tab-content active" id="signature-tab">
+            <div class="form-group">
+                <label for="signature-message">Enter your message:</label>
+                <textarea id="signature-message" placeholder="Type your message here..."></textarea>
+            </div>
+            
+            <div class="form-group signature-container">
+                <label for="signature">Signature:</label>
+                <div id="signature" class="signature-box">No signature generated yet</div>
+            </div>
+            
+            <div class="button-group">
+                <button id="sign-btn" class="button button-sign">Sign Message</button>
+                <button id="verify-btn" class="button button-verify" disabled>Verify Signature</button>
+            </div>
+            
+            <div id="signature-result" class="result hidden"></div>
+            
+            <div class="diagram">
+                <h3>How Digital Signatures Work</h3>
+                <p>1. When you sign a message, the server uses its <strong>private key</strong> to create a unique signature.</p>
+                <p>2. This signature is mathematically linked to your message content.</p>
+                <p>3. When you verify, the server uses its <strong>public key</strong> to check if the signature matches the message.</p>
+                <p>4. If the message was altered after signing, verification will fail.</p>
+            </div>
         </div>
         
-        <div class="button-group">
-            <button id="sign-btn" class="button button-sign">Sign Message</button>
-            <button id="verify-btn" class="button button-verify" disabled>Verify Signature</button>
-            <button id="tamper-btn" class="button button-tamper" disabled>Tamper Message</button>
+        <!-- Encryption Tab -->
+        <div class="tab-content" id="encryption-tab">
+            <div class="form-group">
+                <label for="encryption-message">Enter your message:</label>
+                <textarea id="encryption-message" placeholder="Type your message here to encrypt..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="encrypted-data">Encrypted Data:</label>
+                <div id="encrypted-data" class="encrypted-box">No data encrypted yet</div>
+            </div>
+            
+            <div class="button-group">
+                <button id="encrypt-btn" class="button button-encrypt">Encrypt Message</button>
+                <button id="decrypt-btn" class="button button-decrypt" disabled>Decrypt Message</button>
+            </div>
+            
+            <div id="encryption-result" class="result hidden"></div>
+            
+            <div class="form-group">
+                <label for="decrypted-message">Decrypted Message:</label>
+                <div id="decrypted-message" class="encrypted-box">No data decrypted yet</div>
+            </div>
+            
+            <div class="diagram">
+                <h3>How Secure Encryption Works</h3>
+                <p>1. Your message is encrypted using a <strong>public key</strong>.</p>
+                <p>2. Only the holder of the corresponding <strong>private key</strong> can decrypt it.</p>
+                <p>3. This ensures that even if intercepted, the encrypted message remains secure.</p>
+                <p>4. RSA encryption is used for secure key exchange, while AES provides fast symmetric encryption for message content.</p>
+            </div>
         </div>
         
-        <div id="result" class="result hidden"></div>
+        <!-- Key Exchange Tab -->
+        <div class="tab-content" id="key-exchange-tab">
+            <div class="form-group">
+                <label for="client-public-key">Client Public Key:</label>
+                <div id="client-public-key" class="key-box">No key generated yet</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="server-public-key">Server Public Key:</label>
+                <div id="server-public-key" class="key-box">No key received yet</div>
+            </div>
+            
+            <div class="button-group">
+                <button id="generate-key-btn" class="button button-generate">Generate Client Key</button>
+                <button id="exchange-key-btn" class="button button-exchange" disabled>Exchange with Server</button>
+            </div>
+            
+            <div id="key-exchange-result" class="result hidden"></div>
+            
+            <div class="diagram">
+                <h3>How Secure Key Exchange Works</h3>
+                <p>1. Both client and server generate their own public/private key pairs.</p>
+                <p>2. They exchange public keys while keeping private keys secret.</p>
+                <p>3. A shared secret key is derived using both public and private components.</p>
+                <p>4. This shared key can then be used for fast symmetric encryption.</p>
+            </div>
+        </div>
         
-        <div class="diagram">
-            <h3>How Digital Signatures Work</h3>
-            <p>1. When you sign a message, the server uses its <strong>private key</strong> to create a unique signature.</p>
-            <p>2. This signature is mathematically linked to your message content.</p>
-            <p>3. When you verify, the server uses its <strong>public key</strong> to check if the signature matches the message.</p>
-            <p>4. If the message was altered after signing, verification will fail.</p>
+        <!-- Activity Log Section -->
+        <h3>Session Activity Log</h3>
+        <div id="activity-log" class="activity-log">
+            <div class="log-entry">
+                <span class="log-time">[System]</span> 
+                <span class="log-info">Secure communication session initialized</span>
+            </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const messageInput = document.getElementById('message');
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Set active tab
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show tab content
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    document.getElementById(tabId + '-tab').classList.add('active');
+                });
+            });
+            
+            // Activity Log
+            const activityLog = document.getElementById('activity-log');
+            
+            function addLogEntry(message, type = 'info') {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString();
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `
+                    <span class="log-time">[${timeString}]</span> 
+                    <span class="log-${type}">${message}</span>
+                `;
+                
+                activityLog.appendChild(logEntry);
+                activityLog.scrollTop = activityLog.scrollHeight;
+            }
+            
+            // Validate encrypted payload
+            function isValidEncryptedPayload(data) {
+                try {
+                    // Try to parse the JSON inside the base64 encoded payload
+                    const decoded = atob(data);
+                    const parsed = JSON.parse(decoded);
+                    // Check for required encryption fields
+                    return parsed && parsed.iv && parsed.key && parsed.ciphertext;
+                } catch (e) {
+                    console.error("Invalid encrypted data format:", e);
+                    return false;
+                }
+            }
+            
+            // Digital Signature Functionality
+            const messageInput = document.getElementById('signature-message');
             const signatureBox = document.getElementById('signature');
             const signBtn = document.getElementById('sign-btn');
             const verifyBtn = document.getElementById('verify-btn');
-            const tamperBtn = document.getElementById('tamper-btn');
-            const resultDiv = document.getElementById('result');
+            const resultDiv = document.getElementById('signature-result');
             
             let currentSignature = null;
             
@@ -171,6 +373,8 @@
                     alert('Please enter a message to sign.');
                     return;
                 }
+                
+                addLogEntry('Sending message for signature...', 'info');
                 
                 fetch('/sign', {
                     method: 'POST',
@@ -188,12 +392,14 @@
                     currentSignature = data.signature;
                     signatureBox.textContent = currentSignature;
                     verifyBtn.disabled = false;
-                    tamperBtn.disabled = false;
                     
                     // Hide previous result
                     resultDiv.className = 'result hidden';
+                    
+                    addLogEntry('Message signed successfully', 'success');
                 })
                 .catch(error => {
+                    addLogEntry(`Error signing message: ${error.message}`, 'error');
                     alert('Error signing message: ' + error.message);
                 });
             });
@@ -206,6 +412,8 @@
                     alert('Both message and signature are required.');
                     return;
                 }
+                
+                addLogEntry('Verifying signature...', 'info');
                 
                 fetch('/verify', {
                     method: 'POST',
@@ -227,20 +435,195 @@
                     resultDiv.className = data.status === 'valid' 
                         ? 'result result-valid' 
                         : 'result result-invalid';
+                    
+                    addLogEntry(`Signature verification: ${data.message}`, 
+                        data.status === 'valid' ? 'success' : 'error');
                 })
                 .catch(error => {
+                    addLogEntry(`Error verifying signature: ${error.message}`, 'error');
                     alert('Error verifying signature: ' + error.message);
                 });
             });
             
-            // Tamper with Message
-            tamperBtn.addEventListener('click', function() {
-                const message = messageInput.value;
-                if (message) {
-                    // Slightly modify the message to simulate tampering
-                    messageInput.value = message + ' ';
-                    resultDiv.className = 'result hidden';
+            // Encryption/Decryption Functionality
+            const encryptionMessage = document.getElementById('encryption-message');
+            const encryptedData = document.getElementById('encrypted-data');
+            const decryptedMessage = document.getElementById('decrypted-message');
+            const encryptBtn = document.getElementById('encrypt-btn');
+            const decryptBtn = document.getElementById('decrypt-btn');
+            const encryptionResult = document.getElementById('encryption-result');
+            
+            let currentEncryptedData = null;
+            
+            // Encrypt Message
+            encryptBtn.addEventListener('click', function() {
+                const message = encryptionMessage.value.trim();
+                
+                if (!message) {
+                    alert('Please enter a message to encrypt.');
+                    return;
                 }
+                
+                addLogEntry('Encrypting message...', 'info');
+                
+                fetch('/encrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    currentEncryptedData = data.encrypted;
+                    encryptedData.textContent = currentEncryptedData;
+                    decryptBtn.disabled = false;
+                    
+                    encryptionResult.textContent = 'Message encrypted successfully!';
+                    encryptionResult.className = 'result result-valid';
+                    
+                    addLogEntry('Message encrypted successfully', 'success');
+                })
+                .catch(error => {
+                    addLogEntry(`Error encrypting message: ${error.message}`, 'error');
+                    alert('Error encrypting message: ' + error.message);
+                });
+            });
+            
+            // Decrypt Message - Modified with validation
+            decryptBtn.addEventListener('click', function() {
+                if (!currentEncryptedData) {
+                    alert('No encrypted data to decrypt.');
+                    return;
+                }
+                
+                // Validate that we're trying to decrypt actual encrypted data, not signature data
+                if (!isValidEncryptedPayload(currentEncryptedData)) {
+                    addLogEntry('Cannot decrypt this data. This appears to be a signature, not encrypted data.', 'error');
+                    encryptionResult.textContent = 'Error: This appears to be a signature, not encrypted data.';
+                    encryptionResult.className = 'result result-invalid';
+                    return;
+                }
+                
+                addLogEntry('Decrypting message...', 'info');
+                
+                fetch('/decrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        encrypted: currentEncryptedData
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    decryptedMessage.textContent = data.decrypted;
+                    
+                    encryptionResult.textContent = 'Message decrypted successfully!';
+                    encryptionResult.className = 'result result-valid';
+                    
+                    addLogEntry('Message decrypted successfully', 'success');
+                })
+                .catch(error => {
+                    addLogEntry(`Error decrypting message: ${error.message}`, 'error');
+                    encryptionResult.textContent = `Error: ${error.message}`;
+                    encryptionResult.className = 'result result-invalid';
+                });
+            });
+            
+            // Key Exchange Functionality
+            const clientPublicKey = document.getElementById('client-public-key');
+            const serverPublicKey = document.getElementById('server-public-key');
+            const generateKeyBtn = document.getElementById('generate-key-btn');
+            const exchangeKeyBtn = document.getElementById('exchange-key-btn');
+            const keyExchangeResult = document.getElementById('key-exchange-result');
+            
+            let clientKeyPair = null;
+            
+            // Generate Client Key
+            generateKeyBtn.addEventListener('click', function() {
+                addLogEntry('Generating client key pair...', 'info');
+                
+                fetch('/generate-client-key', {
+                    method: 'GET'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    clientKeyPair = data.client_public_key;
+                    clientPublicKey.textContent = data.client_public_key;
+                    exchangeKeyBtn.disabled = false;
+                    
+                    keyExchangeResult.textContent = 'Client key pair generated successfully!';
+                    keyExchangeResult.className = 'result result-valid';
+                    
+                    addLogEntry('Client key pair generated successfully', 'success');
+                })
+                .catch(error => {
+                    addLogEntry(`Error generating key pair: ${error.message}`, 'error');
+                    alert('Error generating key pair: ' + error.message);
+                });
+            });
+            
+            // Exchange Keys with Server
+            exchangeKeyBtn.addEventListener('click', function() {
+                if (!clientKeyPair) {
+                    alert('Please generate a client key pair first.');
+                    return;
+                }
+                
+                addLogEntry('Initiating key exchange with server...', 'info');
+                
+                fetch('/exchange-keys', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        client_public_key: clientKeyPair
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    serverPublicKey.textContent = data.server_public_key;
+                    
+                    keyExchangeResult.textContent = 'Key exchange completed successfully! Secure channel established.';
+                    keyExchangeResult.className = 'result result-valid';
+                    
+                    addLogEntry('Key exchange completed - Secure channel established', 'success');
+                })
+                .catch(error => {
+                    addLogEntry(`Error in key exchange: ${error.message}`, 'error');
+                    alert('Error in key exchange: ' + error.message);
+                });
+            });
+            
+            // Initialize session
+            addLogEntry('Secure communication portal ready', 'info');
+            addLogEntry('Session initialized with HTTPS protection', 'success');
+        });
+        
+        // Handle page unload
+        window.addEventListener('beforeunload', function() {
+            fetch('/terminate-session', {
+                method: 'POST',
+                keepalive: true // Ensure the request completes even if page is closing
             });
         });
     </script>
